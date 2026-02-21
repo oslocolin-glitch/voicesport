@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
-import { Search, Star, Eye, Download, Bot, ChevronRight, Sparkles } from "lucide-react";
+import { Search, Eye, Download, Bot, Sparkles, Loader2 } from "lucide-react";
 import { TOPICS, FORMAT_ICONS, FLAG_MAP, TARGET_AUDIENCES } from "@/lib/constants";
-import { SAMPLE_RESOURCES } from "@/lib/sampleData";
+import type { Resource } from "@/lib/types";
 
 function Stars({ rating }: { rating: number }) {
   return (
@@ -15,24 +15,49 @@ function Stars({ rating }: { rating: number }) {
   );
 }
 
+// Hardcoded format map until we have resource_files from DB
+const RESOURCE_FORMATS: Record<string, string[]> = {
+  "Toolkit": ["PDF", "Video", "Infographic"],
+  "Report": ["PDF", "Practitioner Brief"],
+  "Guide": ["PDF", "Micro-learning", "Quiz"],
+  "Platform": ["Platform", "PDF", "Video"],
+};
+
 export default function DiscoverPage() {
   const [search, setSearch] = useState("");
   const [topic, setTopic] = useState("All");
   const [role, setRole] = useState("coach");
   const [expanded, setExpanded] = useState<number | null>(null);
+  const [resources, setResources] = useState<Resource[]>([]);
+  const [total, setTotal] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  const filtered = useMemo(() => {
-    return SAMPLE_RESOURCES.filter(r => {
-      if (topic !== "All" && !r.topics.includes(topic)) return false;
-      if (search) {
-        const q = search.toLowerCase();
-        if (!r.title.toLowerCase().includes(q) && !r.description?.toLowerCase().includes(q)) return false;
-      }
-      return true;
-    });
+  const fetchResources = useCallback(async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const params = new URLSearchParams();
+      if (search) params.set("q", search);
+      if (topic !== "All") params.set("topic", topic);
+      const res = await fetch(`/api/resources?${params}`);
+      if (!res.ok) throw new Error("Failed to fetch");
+      const data = await res.json();
+      setResources(data.data);
+      setTotal(data.total);
+    } catch {
+      setError("Failed to load resources");
+    } finally {
+      setLoading(false);
+    }
   }, [search, topic]);
 
-  const totalApplied = SAMPLE_RESOURCES.reduce((s, r) => s + r.applied_count, 0);
+  useEffect(() => {
+    const timer = setTimeout(fetchResources, search ? 300 : 0);
+    return () => clearTimeout(timer);
+  }, [fetchResources, search]);
+
+  const totalApplied = resources.reduce((s, r) => s + (r.applied_count || 0), 0);
 
   return (
     <div className="min-h-screen">
@@ -85,78 +110,94 @@ export default function DiscoverPage() {
       <div className="max-w-5xl mx-auto px-4 py-6">
         {/* Topic pills */}
         <div className="flex gap-2 mb-5 flex-wrap">
-          <button onClick={() => setTopic("All")} className={`px-3.5 py-1.5 rounded-full text-xs font-medium border transition ${topic === "All" ? "bg-gray-900 dark:bg-white text-white dark:text-gray-900 border-transparent" : "bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-700 hover:border-gray-300"}`}>
+          <button onClick={() => setTopic("All")} className={`px-3.5 py-1.5 rounded-full text-xs font-medium border transition ${topic === "All" ? "bg-white text-gray-900 border-transparent" : "bg-gray-800 text-gray-300 border-gray-700 hover:border-gray-600"}`}>
             All
           </button>
           {TOPICS.map(t => (
-            <button key={t} onClick={() => setTopic(t)} className={`px-3.5 py-1.5 rounded-full text-xs font-medium border transition ${topic === t ? "bg-gray-900 dark:bg-white text-white dark:text-gray-900 border-transparent" : "bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-700 hover:border-gray-300"}`}>
+            <button key={t} onClick={() => setTopic(t)} className={`px-3.5 py-1.5 rounded-full text-xs font-medium border transition ${topic === t ? "bg-white text-gray-900 border-transparent" : "bg-gray-800 text-gray-300 border-gray-700 hover:border-gray-600"}`}>
               {t}
             </button>
           ))}
         </div>
 
-        <p className="text-sm text-gray-500 mb-4">{filtered.length} resource{filtered.length !== 1 ? "s" : ""} found</p>
+        {error && <div className="text-sm text-red-400 bg-red-950/30 rounded-xl p-3 mb-4">{error}</div>}
 
-        {/* Resource cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filtered.map(r => (
-            <div
-              key={r.id}
-              onClick={() => setExpanded(expanded === r.id ? null : r.id)}
-              className={`bg-white dark:bg-gray-900 rounded-2xl border cursor-pointer transition-all duration-200 overflow-hidden ${expanded === r.id ? "border-emerald-500 shadow-lg shadow-emerald-500/10" : "border-gray-200 dark:border-gray-800 hover:shadow-md"}`}
-            >
-              <div className="p-4">
-                <div className="flex justify-between items-start mb-2">
-                  <span className="text-[10px] font-semibold bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 px-2 py-0.5 rounded-md">{r.resource_type}</span>
-                  <span className="text-[10px] font-semibold bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400 px-2 py-0.5 rounded-md">✅ {r.applied_count} applied</span>
-                </div>
-                <h3 className="text-sm font-semibold text-gray-900 dark:text-white leading-snug mb-2">{r.title}</h3>
-                <div className="flex gap-1 flex-wrap mb-2">
-                  <span className="text-[10px] bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400 px-1.5 py-0.5 rounded">🏷️ {r.topics[0]}</span>
-                  <span className="text-[10px] text-gray-400">{r.partner_countries.map(c => FLAG_MAP[c] || c).join(" ")}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <Stars rating={r.rating_avg} />
-                  <div className="flex gap-3 text-[11px] text-gray-400">
-                    <span className="flex items-center gap-1"><Eye className="w-3 h-3" />{r.view_count.toLocaleString()}</span>
-                    <span className="flex items-center gap-1"><Download className="w-3 h-3" />{r.download_count.toLocaleString()}</span>
-                  </div>
-                </div>
-              </div>
+        <p className="text-sm text-gray-500 mb-4">
+          {loading ? "Searching..." : `${total} resource${total !== 1 ? "s" : ""} found`}
+        </p>
 
-              {/* Format bar */}
-              <div className="px-4 py-2 border-t border-gray-100 dark:border-gray-800 flex gap-1 flex-wrap items-center">
-                {r.formats.map(f => (
-                  <span key={f} className="text-[10px] bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded px-1.5 py-0.5 text-gray-500 dark:text-gray-400">{FORMAT_ICONS[f] || ""} {f}</span>
-                ))}
-                <span className="ml-auto flex gap-0.5">
-                  {r.languages.map(l => (
-                    <span key={l} className="text-[9px] font-semibold bg-gray-900 dark:bg-gray-700 text-white px-1.5 py-0.5 rounded">{l}</span>
-                  ))}
-                </span>
-              </div>
+        {loading ? (
+          <div className="flex justify-center py-20">
+            <Loader2 className="w-6 h-6 text-emerald-400 animate-spin" />
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {resources.map(r => {
+              const formats = RESOURCE_FORMATS[r.resource_type] || ["PDF"];
+              return (
+                <div
+                  key={r.id}
+                  onClick={() => setExpanded(expanded === r.id ? null : r.id)}
+                  className={`bg-gray-900 rounded-2xl border cursor-pointer transition-all duration-200 overflow-hidden ${expanded === r.id ? "border-emerald-500 shadow-lg shadow-emerald-500/10" : "border-gray-800 hover:border-gray-700"}`}
+                >
+                  <div className="p-4">
+                    <div className="flex justify-between items-start mb-2">
+                      <span className="text-[10px] font-semibold bg-blue-950/50 text-blue-400 px-2 py-0.5 rounded-md">{r.resource_type}</span>
+                      <span className="text-[10px] font-semibold bg-emerald-950/30 text-emerald-400 px-2 py-0.5 rounded-md">✅ {r.applied_count} applied</span>
+                    </div>
+                    <h3 className="text-sm font-semibold text-white leading-snug mb-2">{r.title}</h3>
+                    <div className="flex gap-1 flex-wrap mb-2">
+                      <span className="text-[10px] bg-amber-950/30 text-amber-400 px-1.5 py-0.5 rounded">🏷️ {r.topics?.[0]}</span>
+                      <span className="text-[10px] text-gray-500">{r.partner_countries?.map((c: string) => FLAG_MAP[c] || c).join(" ")}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <Stars rating={Number(r.rating_avg) || 0} />
+                      <div className="flex gap-3 text-[11px] text-gray-500">
+                        <span className="flex items-center gap-1"><Eye className="w-3 h-3" />{(r.view_count || 0).toLocaleString()}</span>
+                        <span className="flex items-center gap-1"><Download className="w-3 h-3" />{(r.download_count || 0).toLocaleString()}</span>
+                      </div>
+                    </div>
+                  </div>
 
-              {/* Expanded detail */}
-              {expanded === r.id && (
-                <div className="px-4 py-3 border-t border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950">
-                  <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed mb-3">{r.abstract}</p>
-                  <div className="text-[10px] text-gray-400 mb-3">
-                    📄 {r.page_count} pages · {r.project_name} · {r.project_year} · {r.license}
+                  <div className="px-4 py-2 border-t border-gray-800 flex gap-1 flex-wrap items-center">
+                    {formats.map((f: string) => (
+                      <span key={f} className="text-[10px] bg-gray-800 border border-gray-700 rounded px-1.5 py-0.5 text-gray-400">{FORMAT_ICONS[f] || ""} {f}</span>
+                    ))}
+                    <span className="ml-auto flex gap-0.5">
+                      {r.languages?.map((l: string) => (
+                        <span key={l} className="text-[9px] font-semibold bg-gray-700 text-white px-1.5 py-0.5 rounded">{l}</span>
+                      ))}
+                    </span>
                   </div>
-                  <div className="flex gap-2">
-                    <Link href={`/resource/${r.slug}`} className="flex-1 text-center bg-emerald-500 hover:bg-emerald-400 text-white text-xs font-semibold py-2 rounded-lg transition">
-                      ⬇ Download
-                    </Link>
-                    <Link href="/ai-studio" className="flex-1 text-center bg-gradient-to-r from-violet-600 to-blue-600 hover:from-violet-500 hover:to-blue-500 text-white text-xs font-semibold py-2 rounded-lg transition flex items-center justify-center gap-1">
-                      <Bot className="w-3 h-3" /> AI Transform
-                    </Link>
-                    <button className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-xs">⭐</button>
-                  </div>
+
+                  {expanded === r.id && (
+                    <div className="px-4 py-3 border-t border-gray-800 bg-gray-950">
+                      <p className="text-xs text-gray-400 leading-relaxed mb-3">{r.abstract}</p>
+                      <div className="text-[10px] text-gray-500 mb-3">
+                        📄 {r.page_count} pages · {r.project_name} · {r.project_year} · {r.license}
+                      </div>
+                      <div className="flex gap-2">
+                        <Link href={`/resource/${r.slug}`} className="flex-1 text-center bg-emerald-500 hover:bg-emerald-400 text-white text-xs font-semibold py-2 rounded-lg transition">
+                          ⬇ Download
+                        </Link>
+                        <Link href="/ai-studio" className="flex-1 text-center bg-gradient-to-r from-violet-600 to-blue-600 text-white text-xs font-semibold py-2 rounded-lg transition flex items-center justify-center gap-1">
+                          <Bot className="w-3 h-3" /> AI Transform
+                        </Link>
+                        <button className="bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-xs text-gray-400">⭐</button>
+                      </div>
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
-          ))}
-        </div>
+              );
+            })}
+          </div>
+        )}
+
+        {!loading && resources.length === 0 && !error && (
+          <div className="text-center py-20">
+            <p className="text-gray-500 text-sm">No resources found. Try a different search or topic.</p>
+          </div>
+        )}
       </div>
     </div>
   );
