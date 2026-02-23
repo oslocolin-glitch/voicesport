@@ -29,42 +29,54 @@ const FEATURES = [
     title: "Discover",
     desc: "Find sport knowledge resources from EU-funded projects across all disciplines.",
     href: "/",
-    gradient: "from-emerald-400 to-cyan-400",
+    color: "bg-[#30d158]", // Apple green
+    shadow: "shadow-[0_4px_16px_rgba(48,209,88,0.3)]",
+    size: "large",
   },
   {
     icon: Bot,
     title: "AI Studio",
     desc: "Transform documents into summaries, translations, infographics and micro-learning modules.",
     href: "/ai-studio",
-    gradient: "from-violet-400 to-blue-400",
+    color: "bg-[#5e5ce6]", // Apple indigo
+    shadow: "shadow-[0_4px_16px_rgba(94,92,230,0.3)]",
+    size: "large",
   },
   {
     icon: Upload,
     title: "Submit",
     desc: "Share your project outputs with the European sport community. Get visibility and impact.",
     href: "/submit",
-    gradient: "from-amber-400 to-orange-400",
+    color: "bg-[#ff9f0a]", // Apple orange
+    shadow: "shadow-[0_4px_16px_rgba(255,159,10,0.3)]",
+    size: "normal",
   },
   {
     icon: BarChart3,
     title: "Impact",
     desc: "Track real-world application. See how knowledge moves from reports to practice.",
     href: "/dashboard",
-    gradient: "from-pink-400 to-rose-400",
+    color: "bg-[#ff375f]", // Apple pink
+    shadow: "shadow-[0_4px_16px_rgba(255,55,95,0.3)]",
+    size: "normal",
   },
   {
     icon: Users,
     title: "Community",
     desc: "Connect with coaches, researchers and policy-makers across European sport.",
     href: "/communities",
-    gradient: "from-cyan-400 to-blue-400",
+    color: "bg-[#64d2ff]", // Apple cyan
+    shadow: "shadow-[0_4px_16px_rgba(100,210,255,0.3)]",
+    size: "normal",
   },
   {
     icon: BookOpen,
     title: "Multi-format",
     desc: "Every resource available as PDF, video summary, quiz, podcast — whatever works for you.",
     href: "/",
-    gradient: "from-emerald-400 to-teal-400",
+    color: "bg-[#30d158]", // Apple green
+    shadow: "shadow-[0_4px_16px_rgba(48,209,88,0.3)]",
+    size: "normal",
   },
 ];
 
@@ -173,22 +185,38 @@ export default function DiscoverPage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-            {FEATURES.map((f, i) => (
+          {/* Top 2 features — large cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
+            {FEATURES.filter(f => f.size === "large").map((f, i) => (
               <Link
                 key={f.title}
                 href={f.href}
-                className="animate-fade-in-up group glass-card rounded-3xl p-8 hover:bg-white/[0.06] transition-all duration-500 hover:-translate-y-1"
+                className="animate-fade-in-up group rounded-3xl bg-[#1c1c1e] p-10 hover:bg-[#2c2c2e] transition-all duration-500"
                 style={{ animationDelay: `${i * 100}ms` }}
               >
-                <div className={`inline-flex p-3 rounded-2xl bg-gradient-to-br ${f.gradient} mb-5`}>
-                  <f.icon className="w-6 h-6 text-white" />
+                <div className={`inline-flex p-4 rounded-[18px] ${f.color} ${f.shadow} mb-6`}>
+                  <f.icon className="w-7 h-7 text-white" strokeWidth={2.2} />
                 </div>
-                <h3 className="text-xl font-semibold text-white mb-2 group-hover:text-emerald-400 transition">{f.title}</h3>
+                <h3 className="text-2xl font-semibold text-white mb-2 tracking-tight">{f.title}</h3>
+                <p className="text-[15px] text-gray-400 leading-relaxed max-w-sm">{f.desc}</p>
+              </Link>
+            ))}
+          </div>
+
+          {/* Bottom 4 features — smaller cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            {FEATURES.filter(f => f.size === "normal").map((f, i) => (
+              <Link
+                key={f.title}
+                href={f.href}
+                className="animate-fade-in-up group rounded-3xl bg-[#1c1c1e] p-7 hover:bg-[#2c2c2e] transition-all duration-500"
+                style={{ animationDelay: `${(i + 2) * 100}ms` }}
+              >
+                <div className={`inline-flex p-3.5 rounded-[14px] ${f.color} ${f.shadow} mb-5`}>
+                  <f.icon className="w-5 h-5 text-white" strokeWidth={2.2} />
+                </div>
+                <h3 className="text-lg font-semibold text-white mb-1.5 tracking-tight">{f.title}</h3>
                 <p className="text-sm text-gray-400 leading-relaxed">{f.desc}</p>
-                <div className="mt-4 flex items-center gap-1 text-sm font-medium text-emerald-400 opacity-0 group-hover:opacity-100 transition-opacity">
-                  Explore <ChevronRight className="w-3.5 h-3.5" />
-                </div>
               </Link>
             ))}
           </div>
@@ -215,8 +243,8 @@ export default function DiscoverPage() {
                 onClick={() => setRole(r.key)}
                 className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
                   role === r.key
-                    ? "bg-white text-black"
-                    : "bg-white/[0.06] text-gray-400 hover:bg-white/[0.1] hover:text-white"
+                    ? "bg-white text-black shadow-[0_2px_8px_rgba(255,255,255,0.15)]"
+                    : "bg-[#1c1c1e] text-gray-400 hover:bg-[#2c2c2e] hover:text-white"
                 }`}
               >
                 {r.icon} {r.label}
@@ -232,15 +260,15 @@ export default function DiscoverPage() {
               value={search}
               onChange={e => setSearch(e.target.value)}
               placeholder='Try "safeguarding toolkit" or "AI coaching"'
-              className="w-full pl-14 pr-6 py-4 rounded-2xl bg-white/[0.06] border border-white/[0.1] text-white text-base outline-none focus:border-emerald-500/50 focus:bg-white/[0.08] transition placeholder:text-gray-500"
+              className="w-full pl-14 pr-6 py-4 rounded-2xl bg-[#1c1c1e] border border-transparent text-white text-base outline-none focus:border-white/20 focus:bg-[#2c2c2e] transition placeholder:text-gray-500"
             />
           </div>
 
           {/* Topic pills */}
           <div className="flex gap-2 mb-8 flex-wrap justify-center">
-            <button onClick={() => setTopic("All")} className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${topic === "All" ? "bg-white text-black" : "bg-white/[0.06] text-gray-400 hover:text-white"}`}>All</button>
+            <button onClick={() => setTopic("All")} className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${topic === "All" ? "bg-white text-black shadow-[0_2px_8px_rgba(255,255,255,0.15)]" : "bg-[#1c1c1e] text-gray-400 hover:bg-[#2c2c2e] hover:text-white"}`}>All</button>
             {TOPICS.map(t => (
-              <button key={t} onClick={() => setTopic(t)} className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${topic === t ? "bg-white text-black" : "bg-white/[0.06] text-gray-400 hover:text-white"}`}>{t}</button>
+              <button key={t} onClick={() => setTopic(t)} className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${topic === t ? "bg-white text-black shadow-[0_2px_8px_rgba(255,255,255,0.15)]" : "bg-[#1c1c1e] text-gray-400 hover:bg-[#2c2c2e] hover:text-white"}`}>{t}</button>
             ))}
           </div>
 
@@ -270,7 +298,7 @@ export default function DiscoverPage() {
                   <div
                     key={r.id}
                     onClick={() => setExpanded(isExpanded ? null : r.id)}
-                    className={`animate-fade-in-up glass-card rounded-2xl cursor-pointer transition-all duration-300 overflow-hidden ${isExpanded ? "ring-1 ring-emerald-500/50 shadow-lg shadow-emerald-500/5" : "hover:bg-white/[0.06]"}`}
+                    className={`animate-fade-in-up rounded-2xl cursor-pointer transition-all duration-300 overflow-hidden ${isExpanded ? "bg-[#2c2c2e] ring-1 ring-emerald-500/30" : "bg-[#1c1c1e] hover:bg-[#2c2c2e]"}`}
                     style={{ animationDelay: `${i * 60}ms` }}
                   >
                     <div className="p-5">
