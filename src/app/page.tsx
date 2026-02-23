@@ -2,10 +2,11 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
-import { Search, Eye, Download, Bot, Sparkles, Loader2 } from "lucide-react";
+import { Search, Eye, Download, Bot, ArrowRight, Sparkles, BookOpen, Upload, Users, BarChart3, Loader2, ChevronRight } from "lucide-react";
 import { TOPICS, FORMAT_ICONS, FLAG_MAP, TARGET_AUDIENCES } from "@/lib/constants";
 import type { Resource } from "@/lib/types";
 
+/* ─── Tiny helpers ─── */
 function Stars({ rating }: { rating: number }) {
   return (
     <span className="flex items-center gap-1 text-xs">
@@ -15,13 +16,57 @@ function Stars({ rating }: { rating: number }) {
   );
 }
 
-// Hardcoded format map until we have resource_files from DB
 const RESOURCE_FORMATS: Record<string, string[]> = {
-  "Toolkit": ["PDF", "Video", "Infographic"],
-  "Report": ["PDF", "Practitioner Brief"],
-  "Guide": ["PDF", "Micro-learning", "Quiz"],
-  "Platform": ["Platform", "PDF", "Video"],
+  Toolkit: ["PDF", "Video", "Infographic"],
+  Report: ["PDF", "Practitioner Brief"],
+  Guide: ["PDF", "Micro-learning", "Quiz"],
+  Platform: ["Platform", "PDF", "Video"],
 };
+
+const FEATURES = [
+  {
+    icon: Search,
+    title: "Discover",
+    desc: "Find sport knowledge resources from EU-funded projects across all disciplines.",
+    href: "/",
+    gradient: "from-emerald-400 to-cyan-400",
+  },
+  {
+    icon: Bot,
+    title: "AI Studio",
+    desc: "Transform documents into summaries, translations, infographics and micro-learning modules.",
+    href: "/ai-studio",
+    gradient: "from-violet-400 to-blue-400",
+  },
+  {
+    icon: Upload,
+    title: "Submit",
+    desc: "Share your project outputs with the European sport community. Get visibility and impact.",
+    href: "/submit",
+    gradient: "from-amber-400 to-orange-400",
+  },
+  {
+    icon: BarChart3,
+    title: "Impact",
+    desc: "Track real-world application. See how knowledge moves from reports to practice.",
+    href: "/dashboard",
+    gradient: "from-pink-400 to-rose-400",
+  },
+  {
+    icon: Users,
+    title: "Community",
+    desc: "Connect with coaches, researchers and policy-makers across European sport.",
+    href: "/communities",
+    gradient: "from-cyan-400 to-blue-400",
+  },
+  {
+    icon: BookOpen,
+    title: "Multi-format",
+    desc: "Every resource available as PDF, video summary, quiz, podcast — whatever works for you.",
+    href: "/",
+    gradient: "from-emerald-400 to-teal-400",
+  },
+];
 
 export default function DiscoverPage() {
   const [search, setSearch] = useState("");
@@ -34,8 +79,7 @@ export default function DiscoverPage() {
   const [error, setError] = useState("");
 
   const fetchResources = useCallback(async () => {
-    setLoading(true);
-    setError("");
+    setLoading(true); setError("");
     try {
       const params = new URLSearchParams();
       if (search) params.set("q", search);
@@ -45,11 +89,8 @@ export default function DiscoverPage() {
       const data = await res.json();
       setResources(data.data);
       setTotal(data.total);
-    } catch {
-      setError("Failed to load resources");
-    } finally {
-      setLoading(false);
-    }
+    } catch { setError("Failed to load resources"); }
+    finally { setLoading(false); }
   }, [search, topic]);
 
   useEffect(() => {
@@ -60,145 +101,256 @@ export default function DiscoverPage() {
   const totalApplied = resources.reduce((s, r) => s + (r.applied_count || 0), 0);
 
   return (
-    <div className="min-h-screen">
-      {/* ═══ Hero ═══ */}
-      <div className="bg-gradient-to-b from-[#0B1120] via-[#162033] to-[#0D3B3B]">
-        <div className="max-w-5xl mx-auto px-4 pt-10 pb-8 md:pt-14 md:pb-10">
-          <div className="flex flex-col md:flex-row md:items-center gap-6 mb-8">
-            <div className="flex-1">
-              <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/15 rounded-full px-4 py-1.5 text-sm text-emerald-300 mb-4">
-                <Sparkles className="w-3.5 h-3.5" /> AI-Powered Sport Knowledge
-              </div>
-              <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-white tracking-tight leading-tight mb-3">
-                Discover. Transform. Apply.
-              </h1>
-              <p className="text-gray-400 text-base max-w-xl">
-                One hub for all EU sport project outputs — made findable, accessible and actionable through AI.
-              </p>
+    <div className="min-h-screen bg-black">
+
+      {/* ═══════════════ HERO — Apple-style cinematic ═══════════════ */}
+      <section className="relative overflow-hidden">
+        {/* Background */}
+        <div className="absolute inset-0">
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(16,185,129,0.15),transparent)]" />
+          <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black to-transparent" />
+        </div>
+
+        <div className="relative max-w-[980px] mx-auto px-6 pt-24 pb-20 md:pt-36 md:pb-28 text-center">
+          {/* Tagline chip */}
+          <div className="animate-fade-in inline-flex items-center gap-2 bg-white/[0.06] backdrop-blur-md border border-white/[0.08] rounded-full px-5 py-2 text-sm text-emerald-300/90 mb-8">
+            <Sparkles className="w-3.5 h-3.5" />
+            The Amplify Pillar of Sport Singularity
+          </div>
+
+          {/* Giant headline — Apple style */}
+          <h1 className="animate-fade-in-up text-5xl sm:text-7xl md:text-[80px] lg:text-[88px] font-bold tracking-tight leading-[1.05] mb-6">
+            <span className="text-white">Sport knowledge,</span>
+            <br />
+            <span className="text-gradient">amplified.</span>
+          </h1>
+
+          <p className="animate-fade-in-up delay-200 text-lg md:text-xl text-gray-400 max-w-2xl mx-auto mb-10 leading-relaxed">
+            One hub for all EU sport project outputs — made findable, accessible and actionable through AI.
+          </p>
+
+          {/* CTA */}
+          <div className="animate-fade-in-up delay-300 flex gap-4 justify-center flex-wrap mb-16">
+            <a href="#discover" className="group inline-flex items-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-white px-8 py-4 rounded-full text-base font-semibold transition-all hover:shadow-[0_0_30px_rgba(16,185,129,0.3)]">
+              Start Exploring
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+            </a>
+            <Link href="/ai-studio" className="group inline-flex items-center gap-2 bg-white/[0.06] hover:bg-white/[0.1] border border-white/[0.12] text-white px-8 py-4 rounded-full text-base font-semibold transition-all">
+              <Bot className="w-4 h-4" />
+              Try AI Studio
+            </Link>
+          </div>
+
+          {/* Stats row — minimal */}
+          <div className="animate-fade-in-up delay-400 flex items-center justify-center gap-8 md:gap-16 text-center">
+            <div>
+              <div className="text-3xl md:text-4xl font-bold text-white">{total || "—"}</div>
+              <div className="text-xs text-gray-500 mt-1">Resources</div>
             </div>
-            <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-2xl px-6 py-4 text-center">
-              <div className="text-[10px] text-gray-400 uppercase tracking-widest">North Star</div>
-              <div className="text-4xl font-extrabold text-emerald-400 my-1">{totalApplied}</div>
-              <div className="text-xs text-gray-400">&quot;Applied in practice&quot;</div>
+            <div className="w-px h-10 bg-white/10" />
+            <div>
+              <div className="text-3xl md:text-4xl font-bold text-emerald-400">{totalApplied}</div>
+              <div className="text-xs text-gray-500 mt-1">Applied in Practice</div>
             </div>
+            <div className="w-px h-10 bg-white/10" />
+            <div>
+              <div className="text-3xl md:text-4xl font-bold text-white">30+</div>
+              <div className="text-xs text-gray-500 mt-1">Countries</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ═══════════════ FEATURES — Apple grid ═══════════════ */}
+      <section className="section-padding bg-black">
+        <div className="max-w-[980px] mx-auto px-6">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-5xl font-bold text-white tracking-tight mb-4">
+              Everything you need.
+            </h2>
+            <p className="text-lg text-gray-400 max-w-lg mx-auto">
+              From discovery to application — a complete platform for sport knowledge.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            {FEATURES.map((f, i) => (
+              <Link
+                key={f.title}
+                href={f.href}
+                className="animate-fade-in-up group glass-card rounded-3xl p-8 hover:bg-white/[0.06] transition-all duration-500 hover:-translate-y-1"
+                style={{ animationDelay: `${i * 100}ms` }}
+              >
+                <div className={`inline-flex p-3 rounded-2xl bg-gradient-to-br ${f.gradient} mb-5`}>
+                  <f.icon className="w-6 h-6 text-white" />
+                </div>
+                <h3 className="text-xl font-semibold text-white mb-2 group-hover:text-emerald-400 transition">{f.title}</h3>
+                <p className="text-sm text-gray-400 leading-relaxed">{f.desc}</p>
+                <div className="mt-4 flex items-center gap-1 text-sm font-medium text-emerald-400 opacity-0 group-hover:opacity-100 transition-opacity">
+                  Explore <ChevronRight className="w-3.5 h-3.5" />
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ═══════════════ DISCOVER — Search & Resources ═══════════════ */}
+      <section id="discover" className="section-padding bg-[#0a0a0a]">
+        <div className="max-w-[980px] mx-auto px-6">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl md:text-5xl font-bold text-white tracking-tight mb-4">
+              Discover resources.
+            </h2>
+            <p className="text-lg text-gray-400 max-w-lg mx-auto">
+              Search across EU sport project outputs by topic, role, or keyword.
+            </p>
           </div>
 
           {/* Role selector */}
-          <div className="flex gap-2 mb-4 flex-wrap">
+          <div className="flex gap-2 mb-6 flex-wrap justify-center">
             {TARGET_AUDIENCES.map(r => (
-              <button key={r.key} onClick={() => setRole(r.key)} className={`px-3.5 py-1.5 rounded-full text-xs font-medium transition ${role === r.key ? "bg-emerald-500 text-white" : "bg-white/[0.07] text-gray-300 border border-white/10 hover:bg-white/10"}`}>
+              <button
+                key={r.key}
+                onClick={() => setRole(r.key)}
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                  role === r.key
+                    ? "bg-white text-black"
+                    : "bg-white/[0.06] text-gray-400 hover:bg-white/[0.1] hover:text-white"
+                }`}
+              >
                 {r.icon} {r.label}
               </button>
             ))}
           </div>
 
-          {/* Search */}
-          <div className="relative">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+          {/* Search bar — Apple style clean */}
+          <div className="relative max-w-2xl mx-auto mb-8">
+            <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
             <input
               type="text"
               value={search}
               onChange={e => setSearch(e.target.value)}
-              placeholder='Try: "safeguarding toolkit" or "AI coaching guide in Turkish"'
-              className="w-full pl-12 pr-4 py-3.5 rounded-2xl border-2 border-emerald-500/30 bg-white/95 text-gray-900 text-sm outline-none focus:border-emerald-500 transition placeholder:text-gray-400"
+              placeholder='Try "safeguarding toolkit" or "AI coaching"'
+              className="w-full pl-14 pr-6 py-4 rounded-2xl bg-white/[0.06] border border-white/[0.1] text-white text-base outline-none focus:border-emerald-500/50 focus:bg-white/[0.08] transition placeholder:text-gray-500"
             />
           </div>
-        </div>
-      </div>
 
-      {/* ═══ Content ═══ */}
-      <div className="max-w-5xl mx-auto px-4 py-6">
-        {/* Topic pills */}
-        <div className="flex gap-2 mb-5 flex-wrap">
-          <button onClick={() => setTopic("All")} className={`px-3.5 py-1.5 rounded-full text-xs font-medium border transition ${topic === "All" ? "bg-white text-gray-900 border-transparent" : "bg-gray-800 text-gray-300 border-gray-700 hover:border-gray-600"}`}>
-            All
-          </button>
-          {TOPICS.map(t => (
-            <button key={t} onClick={() => setTopic(t)} className={`px-3.5 py-1.5 rounded-full text-xs font-medium border transition ${topic === t ? "bg-white text-gray-900 border-transparent" : "bg-gray-800 text-gray-300 border-gray-700 hover:border-gray-600"}`}>
-              {t}
-            </button>
-          ))}
-        </div>
-
-        {error && <div className="text-sm text-red-400 bg-red-950/30 rounded-xl p-3 mb-4">{error}</div>}
-
-        <p className="text-sm text-gray-500 mb-4">
-          {loading ? "Searching..." : `${total} resource${total !== 1 ? "s" : ""} found`}
-        </p>
-
-        {loading ? (
-          <div className="flex justify-center py-20">
-            <Loader2 className="w-6 h-6 text-emerald-400 animate-spin" />
+          {/* Topic pills */}
+          <div className="flex gap-2 mb-8 flex-wrap justify-center">
+            <button onClick={() => setTopic("All")} className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${topic === "All" ? "bg-white text-black" : "bg-white/[0.06] text-gray-400 hover:text-white"}`}>All</button>
+            {TOPICS.map(t => (
+              <button key={t} onClick={() => setTopic(t)} className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${topic === t ? "bg-white text-black" : "bg-white/[0.06] text-gray-400 hover:text-white"}`}>{t}</button>
+            ))}
           </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {resources.map(r => {
-              const formats = RESOURCE_FORMATS[r.resource_type] || ["PDF"];
-              return (
-                <div
-                  key={r.id}
-                  onClick={() => setExpanded(expanded === r.id ? null : r.id)}
-                  className={`bg-gray-900 rounded-2xl border cursor-pointer transition-all duration-200 overflow-hidden ${expanded === r.id ? "border-emerald-500 shadow-lg shadow-emerald-500/10" : "border-gray-800 hover:border-gray-700"}`}
-                >
-                  <div className="p-4">
-                    <div className="flex justify-between items-start mb-2">
-                      <span className="text-[10px] font-semibold bg-blue-950/50 text-blue-400 px-2 py-0.5 rounded-md">{r.resource_type}</span>
-                      <span className="text-[10px] font-semibold bg-emerald-950/30 text-emerald-400 px-2 py-0.5 rounded-md">✅ {r.applied_count} applied</span>
-                    </div>
-                    <h3 className="text-sm font-semibold text-white leading-snug mb-2">{r.title}</h3>
-                    <div className="flex gap-1 flex-wrap mb-2">
-                      <span className="text-[10px] bg-amber-950/30 text-amber-400 px-1.5 py-0.5 rounded">🏷️ {r.topics?.[0]}</span>
-                      <span className="text-[10px] text-gray-500">{r.partner_countries?.map((c: string) => FLAG_MAP[c] || c).join(" ")}</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <Stars rating={Number(r.rating_avg) || 0} />
-                      <div className="flex gap-3 text-[11px] text-gray-500">
-                        <span className="flex items-center gap-1"><Eye className="w-3 h-3" />{(r.view_count || 0).toLocaleString()}</span>
-                        <span className="flex items-center gap-1"><Download className="w-3 h-3" />{(r.download_count || 0).toLocaleString()}</span>
+
+          {/* Results count */}
+          <p className="text-sm text-gray-500 mb-6 text-center">
+            {loading ? "Searching..." : `${total} resource${total !== 1 ? "s" : ""} found`}
+          </p>
+
+          {error && <div className="text-sm text-red-400 bg-red-950/30 rounded-2xl p-4 mb-6 text-center">{error}</div>}
+
+          {/* Resource Grid */}
+          {loading ? (
+            <div className="flex justify-center py-20">
+              <Loader2 className="w-6 h-6 text-emerald-400 animate-spin" />
+            </div>
+          ) : resources.length === 0 ? (
+            <div className="text-center py-20">
+              <BookOpen className="w-10 h-10 text-gray-700 mx-auto mb-4" />
+              <p className="text-gray-500">No resources found. Try a different search or topic.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {resources.map((r, i) => {
+                const formats = RESOURCE_FORMATS[r.resource_type] || ["PDF"];
+                const isExpanded = expanded === r.id;
+                return (
+                  <div
+                    key={r.id}
+                    onClick={() => setExpanded(isExpanded ? null : r.id)}
+                    className={`animate-fade-in-up glass-card rounded-2xl cursor-pointer transition-all duration-300 overflow-hidden ${isExpanded ? "ring-1 ring-emerald-500/50 shadow-lg shadow-emerald-500/5" : "hover:bg-white/[0.06]"}`}
+                    style={{ animationDelay: `${i * 60}ms` }}
+                  >
+                    <div className="p-5">
+                      <div className="flex justify-between items-start mb-3">
+                        <span className="text-[11px] font-semibold bg-emerald-500/10 text-emerald-400 px-2.5 py-1 rounded-lg">{r.resource_type}</span>
+                        <span className="text-[11px] font-medium text-gray-500">✅ {r.applied_count} applied</span>
+                      </div>
+                      <h3 className="text-base font-semibold text-white leading-snug mb-3">{r.title}</h3>
+                      <div className="flex gap-1.5 flex-wrap mb-3">
+                        <span className="text-[11px] bg-white/[0.06] text-gray-300 px-2 py-0.5 rounded-lg">{r.topics?.[0]}</span>
+                        <span className="text-[11px] text-gray-500">{r.partner_countries?.map((c: string) => FLAG_MAP[c] || c).join(" ")}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <Stars rating={Number(r.rating_avg) || 0} />
+                        <div className="flex gap-3 text-[11px] text-gray-500">
+                          <span className="flex items-center gap-1"><Eye className="w-3 h-3" />{(r.view_count || 0).toLocaleString()}</span>
+                          <span className="flex items-center gap-1"><Download className="w-3 h-3" />{(r.download_count || 0).toLocaleString()}</span>
+                        </div>
                       </div>
                     </div>
-                  </div>
 
-                  <div className="px-4 py-2 border-t border-gray-800 flex gap-1 flex-wrap items-center">
-                    {formats.map((f: string) => (
-                      <span key={f} className="text-[10px] bg-gray-800 border border-gray-700 rounded px-1.5 py-0.5 text-gray-400">{FORMAT_ICONS[f] || ""} {f}</span>
-                    ))}
-                    <span className="ml-auto flex gap-0.5">
-                      {r.languages?.map((l: string) => (
-                        <span key={l} className="text-[9px] font-semibold bg-gray-700 text-white px-1.5 py-0.5 rounded">{l}</span>
+                    {/* Format bar */}
+                    <div className="px-5 py-2.5 border-t border-white/[0.05] flex gap-1.5 flex-wrap items-center">
+                      {formats.map((f: string) => (
+                        <span key={f} className="text-[10px] bg-white/[0.06] border border-white/[0.08] rounded-lg px-2 py-0.5 text-gray-400">{FORMAT_ICONS[f] || ""} {f}</span>
                       ))}
-                    </span>
-                  </div>
-
-                  {expanded === r.id && (
-                    <div className="px-4 py-3 border-t border-gray-800 bg-gray-950">
-                      <p className="text-xs text-gray-400 leading-relaxed mb-3">{r.abstract}</p>
-                      <div className="text-[10px] text-gray-500 mb-3">
-                        📄 {r.page_count} pages · {r.project_name} · {r.project_year} · {r.license}
-                      </div>
-                      <div className="flex gap-2">
-                        <Link href={`/resource/${r.slug}`} className="flex-1 text-center bg-emerald-500 hover:bg-emerald-400 text-white text-xs font-semibold py-2 rounded-lg transition">
-                          ⬇ Download
-                        </Link>
-                        <Link href="/ai-studio" className="flex-1 text-center bg-gradient-to-r from-violet-600 to-blue-600 text-white text-xs font-semibold py-2 rounded-lg transition flex items-center justify-center gap-1">
-                          <Bot className="w-3 h-3" /> AI Transform
-                        </Link>
-                        <button className="bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-xs text-gray-400">⭐</button>
-                      </div>
+                      <span className="ml-auto flex gap-1">
+                        {r.languages?.map((l: string) => (
+                          <span key={l} className="text-[9px] font-semibold bg-white/[0.08] text-gray-300 px-1.5 py-0.5 rounded-md">{l}</span>
+                        ))}
+                      </span>
                     </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        )}
 
-        {!loading && resources.length === 0 && !error && (
-          <div className="text-center py-20">
-            <p className="text-gray-500 text-sm">No resources found. Try a different search or topic.</p>
+                    {/* Expanded details */}
+                    {isExpanded && (
+                      <div className="px-5 py-4 border-t border-white/[0.05] bg-white/[0.02]">
+                        <p className="text-xs text-gray-400 leading-relaxed mb-3">{r.abstract}</p>
+                        <div className="text-[11px] text-gray-500 mb-4">
+                          📄 {r.page_count} pages · {r.project_name} · {r.project_year} · {r.license}
+                        </div>
+                        <div className="flex gap-2">
+                          <Link href={`/resource/${r.slug}`} className="flex-1 text-center bg-white text-black text-xs font-semibold py-2.5 rounded-full transition hover:bg-gray-200" onClick={e => e.stopPropagation()}>
+                            Download
+                          </Link>
+                          <Link href="/ai-studio" className="flex-1 text-center bg-gradient-to-r from-violet-500 to-blue-500 text-white text-xs font-semibold py-2.5 rounded-full transition flex items-center justify-center gap-1 hover:shadow-lg hover:shadow-violet-500/20" onClick={e => e.stopPropagation()}>
+                            <Bot className="w-3 h-3" /> AI Transform
+                          </Link>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* ═══════════════ CTA — Final cinematic block ═══════════════ */}
+      <section className="relative section-padding overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_50%_100%,rgba(16,185,129,0.1),transparent)]" />
+        <div className="relative max-w-[980px] mx-auto px-6 text-center">
+          <h2 className="text-4xl sm:text-5xl md:text-6xl font-bold text-white tracking-tight mb-5">
+            Ready to amplify
+            <br />
+            <span className="text-gradient">sport knowledge?</span>
+          </h2>
+          <p className="text-lg text-gray-400 max-w-lg mx-auto mb-10">
+            Join practitioners, researchers and organisations across Europe.
+          </p>
+          <div className="flex gap-4 justify-center flex-wrap">
+            <Link href="/auth/signup" className="group inline-flex items-center gap-2 bg-white text-black px-8 py-4 rounded-full text-base font-semibold hover:shadow-[0_0_30px_rgba(255,255,255,0.15)] transition-all">
+              Get Started <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+            </Link>
+            <Link href="/submit" className="inline-flex items-center gap-2 bg-white/[0.06] border border-white/[0.1] text-white px-8 py-4 rounded-full text-base font-semibold hover:bg-white/[0.1] transition-all">
+              <Upload className="w-4 h-4" /> Submit a Resource
+            </Link>
           </div>
-        )}
-      </div>
+        </div>
+      </section>
     </div>
   );
 }
