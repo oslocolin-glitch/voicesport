@@ -8,7 +8,7 @@ const settingGroups = [
     icon: Globe,
     items: [
       { label: "Site Name", value: "VoiceSport", desc: "Displayed in navbar and meta tags" },
-      { label: "Tagline", value: "European Sport Knowledge Hub", desc: "Shown below the logo" },
+      { label: "Tagline", value: "Sport Knowledge Hub", desc: "Shown below the logo" },
     ],
   },
   {

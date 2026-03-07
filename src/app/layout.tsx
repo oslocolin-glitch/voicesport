@@ -12,7 +12,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "VoiceSport — European Sport Knowledge Hub",
+  title: "VoiceSport — Sport Knowledge Hub",
   description: "Discover, transform and apply sport knowledge from EU projects. AI-powered summaries, translations and practitioner tools.",
 };
 
