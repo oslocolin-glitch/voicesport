@@ -57,8 +57,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 </div>
               </div>
               <div className="border-t pt-4 flex flex-col md:flex-row justify-between items-center gap-2" style={{ borderColor: "var(--border)" }}>
-                <p style={{ color: "var(--text-tertiary)", fontSize: "11px" }}>© 2026 Sport Singularity. All rights reserved.</p>
-                <p style={{ color: "var(--text-tertiary)", fontSize: "11px" }}>Built with purpose for European sport.</p>
+                <p style={{ color: "var(--text-tertiary)", fontSize: "11px" }}>© 2026 VoiceSport. Developed by Sport Singularity, powered by Collective Innovation AS.</p>
+                <p style={{ color: "var(--text-tertiary)", fontSize: "11px" }}>An open knowledge tool for European sport.</p>
               </div>
             </div>
           </footer>
