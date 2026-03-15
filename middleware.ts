@@ -6,7 +6,12 @@ export async function middleware(req: NextRequest) {
   res.headers.set("X-Content-Type-Options", "nosniff");
   res.headers.set("X-Frame-Options", "DENY");
   res.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
-  res = await updateSession(req, res);
+
+  // Skip auth session update for API routes
+  if (!req.nextUrl.pathname.startsWith("/api/")) {
+    res = await updateSession(req, res);
+  }
+
   return res;
 }
 
