@@ -5,8 +5,31 @@ import { Upload, ChevronRight, ChevronLeft, FileUp, Sparkles, Check } from "luci
 
 const STEPS = ["Project Info", "Content Details", "Upload Files", "AI Transform", "Review"];
 
+const LICENSE_OPTIONS = [
+  { value: "CC-BY-4.0", label: "CC-BY 4.0 — Attribution" },
+  { value: "CC-BY-SA-4.0", label: "CC-BY-SA 4.0 — Attribution ShareAlike" },
+  { value: "CC-BY-NC-4.0", label: "CC-BY-NC 4.0 — Attribution NonCommercial" },
+  { value: "CC-BY-NC-SA-4.0", label: "CC-BY-NC-SA 4.0 — Attribution NonCommercial ShareAlike" },
+  { value: "all-rights-reserved", label: "All Rights Reserved" },
+  { value: "public-domain", label: "Public Domain" },
+];
+
 export default function SubmitPage() {
   const [step, setStep] = useState(0);
+  const [form, setForm] = useState({
+    project_name: "",
+    funding_programme: "",
+    partner_countries: "",
+    submitter_name: "",
+    license_type: "CC-BY-4.0",
+    funding_acknowledgement: "",
+    grant_number: "",
+    title: "",
+    description: "",
+  });
+
+  const updateField = (field: string, value: string) =>
+    setForm(prev => ({ ...prev, [field]: value }));
 
   return (
     <div className="min-h-[80vh] max-w-2xl mx-auto px-4 py-10">
@@ -34,19 +57,65 @@ export default function SubmitPage() {
         {step === 0 && (
           <div className="space-y-4">
             <h3 className="text-sm font-semibold text-white">Step 1: Project Information</h3>
-            {["Project Name", "Funding Programme", "Partner Countries", "Your Name & Organisation"].map(label => (
-              <div key={label}>
-                <label className="text-xs font-semibold text-gray-400 mb-1 block">{label}</label>
-                <input placeholder={`e.g. ${label}`} className="w-full px-3 py-2.5 rounded-xl border border-gray-700 bg-gray-800 text-sm text-white outline-none focus:ring-2 focus:ring-emerald-500 placeholder:text-gray-500" />
+            {[
+              { key: "project_name", label: "Project Name", placeholder: "e.g. AMPLIFY-SPORT" },
+              { key: "funding_programme", label: "Funding Programme", placeholder: "e.g. Erasmus+ Sport" },
+              { key: "partner_countries", label: "Partner Countries", placeholder: "e.g. Norway, Turkey, Ireland" },
+              { key: "submitter_name", label: "Your Name & Organisation", placeholder: "e.g. Jane Doe, COLIN" },
+            ].map(f => (
+              <div key={f.key}>
+                <label className="text-xs font-semibold text-gray-400 mb-1 block">{f.label}</label>
+                <input
+                  value={form[f.key as keyof typeof form]}
+                  onChange={e => updateField(f.key, e.target.value)}
+                  placeholder={f.placeholder}
+                  className="w-full px-3 py-2.5 rounded-xl border border-gray-700 bg-gray-800 text-sm text-white outline-none focus:ring-2 focus:ring-emerald-500 placeholder:text-gray-500"
+                />
               </div>
             ))}
+
+            {/* License Type */}
+            <div>
+              <label className="text-xs font-semibold text-gray-400 mb-1 block">License Type</label>
+              <select
+                value={form.license_type}
+                onChange={e => updateField("license_type", e.target.value)}
+                className="w-full px-3 py-2.5 rounded-xl border border-gray-700 bg-gray-800 text-sm text-white outline-none focus:ring-2 focus:ring-emerald-500"
+              >
+                {LICENSE_OPTIONS.map(o => (
+                  <option key={o.value} value={o.value}>{o.label}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Funding Acknowledgement */}
+            <div>
+              <label className="text-xs font-semibold text-gray-400 mb-1 block">Funding Acknowledgement</label>
+              <input
+                value={form.funding_acknowledgement}
+                onChange={e => updateField("funding_acknowledgement", e.target.value)}
+                placeholder="e.g. Co-funded by the European Union"
+                className="w-full px-3 py-2.5 rounded-xl border border-gray-700 bg-gray-800 text-sm text-white outline-none focus:ring-2 focus:ring-emerald-500 placeholder:text-gray-500"
+              />
+            </div>
+
+            {/* Grant Number */}
+            <div>
+              <label className="text-xs font-semibold text-gray-400 mb-1 block">Grant Number <span className="text-gray-600">(optional)</span></label>
+              <input
+                value={form.grant_number}
+                onChange={e => updateField("grant_number", e.target.value)}
+                placeholder="e.g. 101234567"
+                className="w-full px-3 py-2.5 rounded-xl border border-gray-700 bg-gray-800 text-sm text-white outline-none focus:ring-2 focus:ring-emerald-500 placeholder:text-gray-500"
+              />
+            </div>
           </div>
         )}
         {step === 1 && (
           <div className="space-y-4">
             <h3 className="text-sm font-semibold text-white">Step 2: Content Details</h3>
-            <div><label className="text-xs font-semibold text-gray-400 mb-1 block">Title</label><input placeholder="Resource title" className="w-full px-3 py-2.5 rounded-xl border border-gray-700 bg-gray-800 text-sm text-white outline-none focus:ring-2 focus:ring-emerald-500 placeholder:text-gray-500"/></div>
-            <div><label className="text-xs font-semibold text-gray-400 mb-1 block">Description</label><textarea rows={3} placeholder="Brief description..." className="w-full px-3 py-2.5 rounded-xl border border-gray-700 bg-gray-800 text-sm text-white outline-none focus:ring-2 focus:ring-emerald-500 placeholder:text-gray-500 resize-y"/></div>
+            <div><label className="text-xs font-semibold text-gray-400 mb-1 block">Title</label><input value={form.title} onChange={e => updateField("title", e.target.value)} placeholder="Resource title" className="w-full px-3 py-2.5 rounded-xl border border-gray-700 bg-gray-800 text-sm text-white outline-none focus:ring-2 focus:ring-emerald-500 placeholder:text-gray-500"/></div>
+            <div><label className="text-xs font-semibold text-gray-400 mb-1 block">Description</label><textarea value={form.description} onChange={e => updateField("description", e.target.value)} rows={3} placeholder="Brief description..." className="w-full px-3 py-2.5 rounded-xl border border-gray-700 bg-gray-800 text-sm text-white outline-none focus:ring-2 focus:ring-emerald-500 placeholder:text-gray-500 resize-y"/></div>
           </div>
         )}
         {step === 2 && (
