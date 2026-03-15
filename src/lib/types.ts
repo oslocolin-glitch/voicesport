@@ -25,6 +25,7 @@ export interface Resource {
   submitted_by: string | null;
   published_at: string | null;
   created_at: string;
+  available_formats?: string[];
 }
 
 export interface ResourceFile {

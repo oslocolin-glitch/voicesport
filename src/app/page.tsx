@@ -16,11 +16,22 @@ function Stars({ rating }: { rating: number }) {
   );
 }
 
-const RESOURCE_FORMATS: Record<string, string[]> = {
-  Toolkit: ["PDF", "Video", "Infographic"],
-  Report: ["PDF", "Practitioner Brief"],
-  Guide: ["PDF", "Micro-learning", "Quiz"],
-  Platform: ["Platform", "PDF", "Video"],
+const FORMAT_LABELS: Record<string, string> = {
+  practitioner_brief: "Practitioner Brief",
+  audio_digest: "Audio Digest",
+  video_summary: "Video Summary",
+  flashcards: "Flashcards",
+  mind_map: "Mind Map",
+  infographic: "Infographic",
+};
+
+const FORMAT_LABEL_ICONS: Record<string, string> = {
+  practitioner_brief: "📝",
+  audio_digest: "🎧",
+  video_summary: "🎬",
+  flashcards: "🃏",
+  mind_map: "🧠",
+  infographic: "🖼️",
 };
 
 const FEATURES = [
@@ -138,6 +149,7 @@ export default function DiscoverPage() {
       const params = new URLSearchParams();
       if (search) params.set("q", search);
       if (topic !== "All") params.set("topic", topic);
+      if (role) params.set("audience", role);
       const res = await fetch(`/api/resources?${params}`);
       if (!res.ok) throw new Error("Failed to fetch");
       const data = await res.json();
@@ -145,7 +157,7 @@ export default function DiscoverPage() {
       setTotal(data.total);
     } catch { setError("Failed to load resources"); }
     finally { setLoading(false); }
-  }, [search, topic]);
+  }, [search, topic, role]);
 
   useEffect(() => {
     const timer = setTimeout(fetchResources, search ? 300 : 0);
@@ -424,7 +436,6 @@ export default function DiscoverPage() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {resources.map((r, i) => {
-                const formats = RESOURCE_FORMATS[r.resource_type] || ["PDF"];
                 const isExpanded = expanded === r.id;
                 return (
                   <div
@@ -453,8 +464,9 @@ export default function DiscoverPage() {
                     </div>
 
                     <div className="px-5 py-2.5 flex gap-1.5 flex-wrap items-center" style={{ borderTop: "1px solid var(--border)" }}>
-                      {formats.map((f: string) => (
-                        <span key={f} className="text-[10px] rounded-lg px-2 py-0.5" style={{ background: "var(--bg-pill)", color: "var(--text-secondary)", border: "1px solid var(--border)" }}>{FORMAT_ICONS[f] || ""} {f}</span>
+                      <span className="text-[10px] rounded-lg px-2 py-0.5" style={{ background: "var(--bg-pill)", color: "var(--text-secondary)", border: "1px solid var(--border)" }}>📄 {r.resource_type}</span>
+                      {(r.available_formats || []).map((f: string) => (
+                        <span key={f} className="text-[10px] rounded-lg px-2 py-0.5" style={{ background: "var(--bg-pill)", color: "var(--text-secondary)", border: "1px solid var(--border)" }}>{FORMAT_LABEL_ICONS[f] || "📄"} {FORMAT_LABELS[f] || f}</span>
                       ))}
                       <span className="ml-auto flex gap-1">
                         {r.languages?.map((l: string) => (

@@ -51,8 +51,34 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
+  // Fetch available output formats for each resource
+  let enriched = data || [];
+  if (enriched.length > 0) {
+    const ids = enriched.map(r => r.id);
+    const { data: files } = await supabase
+      .from("resource_files")
+      .select("resource_id, file_type")
+      .in("resource_id", ids)
+      .neq("file_type", "source");
+
+    const outputMap: Record<number, string[]> = {};
+    if (files) {
+      for (const f of files) {
+        if (!outputMap[f.resource_id]) outputMap[f.resource_id] = [];
+        if (!outputMap[f.resource_id].includes(f.file_type)) {
+          outputMap[f.resource_id].push(f.file_type);
+        }
+      }
+    }
+
+    enriched = enriched.map(r => ({
+      ...r,
+      available_formats: outputMap[r.id] || [],
+    }));
+  }
+
   return NextResponse.json({
-    data: data || [],
+    data: enriched,
     total: count || 0,
     page,
     perPage,
