@@ -58,31 +58,34 @@ export async function GET(req: NextRequest) {
   // Fetch available output formats for each resource
   let enriched = data || [];
   if (enriched.length > 0) {
-    const ids = enriched.map(r => r.id);
-    const { data: files, error: filesError } = await supabase
-      .from("resource_files")
-      .select("resource_id, file_type")
-      .in("resource_id", ids)
-      .not("file_type", "like", "source%");
+    try {
+      const ids = enriched.map(r => r.id);
+      const { data: files } = await supabase
+        .from("resource_files")
+        .select("resource_id, file_type")
+        .in("resource_id", ids);
 
-    if (filesError) {
-      console.error("resource_files query error:", filesError.message);
-    }
-
-    const outputMap: Record<number, string[]> = {};
-    if (files) {
-      for (const f of files) {
-        if (!outputMap[f.resource_id]) outputMap[f.resource_id] = [];
-        if (!outputMap[f.resource_id].includes(f.file_type)) {
-          outputMap[f.resource_id].push(f.file_type);
+      const outputMap: Record<number, string[]> = {};
+      if (files) {
+        for (const f of files) {
+          // Skip source files
+          if (f.file_type?.startsWith("source")) continue;
+          if (!outputMap[f.resource_id]) outputMap[f.resource_id] = [];
+          if (!outputMap[f.resource_id].includes(f.file_type)) {
+            outputMap[f.resource_id].push(f.file_type);
+          }
         }
       }
-    }
 
-    enriched = enriched.map(r => ({
-      ...r,
-      available_formats: outputMap[r.id] || [],
-    }));
+      enriched = enriched.map(r => ({
+        ...r,
+        available_formats: outputMap[r.id] || [],
+      }));
+    } catch (err) {
+      console.error("resource_files enrichment error:", err);
+      // Continue without formats rather than failing
+      enriched = enriched.map(r => ({ ...r, available_formats: [] }));
+    }
   }
 
   return NextResponse.json({
