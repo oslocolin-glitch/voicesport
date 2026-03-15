@@ -55,8 +55,14 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Generate resource ID if not provided
-    const resId = resourceId || crypto.randomUUID();
+    // Resource ID is integer (from resources table)
+    if (!resourceId) {
+      return NextResponse.json({ error: "resource_id is required" }, { status: 400 });
+    }
+    const resId = parseInt(resourceId, 10);
+    if (isNaN(resId)) {
+      return NextResponse.json({ error: "resource_id must be an integer" }, { status: 400 });
+    }
     const storagePath = `resources/${resId}/${file.name}`;
 
     // Upload to Supabase Storage
@@ -87,12 +93,27 @@ export async function POST(req: NextRequest) {
       console.error("Resource update error:", updateError);
     }
 
+    // Also insert into resource_files as source file
+    const { data: fileRecord } = await supabase
+      .from("resource_files")
+      .insert({
+        resource_id: resId,
+        file_type: "source",
+        file_path: storagePath,
+        file_name: file.name,
+        file_size: file.size,
+        mime_type: file.type,
+      })
+      .select("id")
+      .single();
+
     // Queue AI transform jobs for selected formats
     const formats: string[] = selectedFormats ? JSON.parse(selectedFormats) : [];
     if (formats.length > 0) {
       const jobs = formats.map(format => ({
         resource_id: resId,
-        format_type: format,
+        source_file_id: fileRecord?.id || null,
+        transform_type: format,
         status: "queued",
       }));
 
