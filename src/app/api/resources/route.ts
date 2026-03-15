@@ -55,11 +55,15 @@ export async function GET(req: NextRequest) {
   let enriched = data || [];
   if (enriched.length > 0) {
     const ids = enriched.map(r => r.id);
-    const { data: files } = await supabase
+    const { data: files, error: filesError } = await supabase
       .from("resource_files")
       .select("resource_id, file_type")
       .in("resource_id", ids)
       .not("file_type", "like", "source%");
+
+    if (filesError) {
+      console.error("resource_files query error:", filesError.message);
+    }
 
     const outputMap: Record<number, string[]> = {};
     if (files) {

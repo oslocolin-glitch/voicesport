@@ -136,7 +136,7 @@ const TRANSFORM_FORMATS = [
 export default function DiscoverPage() {
   const [search, setSearch] = useState("");
   const [topic, setTopic] = useState("All");
-  const [role, setRole] = useState("coach");
+  const [role, setRole] = useState("");
   const [expanded, setExpanded] = useState<number | null>(null);
   const [resources, setResources] = useState<Resource[]>([]);
   const [total, setTotal] = useState(0);
@@ -149,7 +149,7 @@ export default function DiscoverPage() {
       const params = new URLSearchParams();
       if (search) params.set("q", search);
       if (topic !== "All") params.set("topic", topic);
-      if (role) params.set("audience", role);
+      if (role && role !== "all") params.set("audience", role);
       const res = await fetch(`/api/resources?${params}`);
       if (!res.ok) throw new Error("Failed to fetch");
       const data = await res.json();
