@@ -9,9 +9,12 @@ function getClient() {
   return createClient(supabaseUrl, supabaseKey);
 }
 
+export const maxDuration = 30;
+
 export async function GET(req: NextRequest) {
   const supabase = getClient();
   if (!supabase) {
+    console.error("Supabase not configured. URL:", supabaseUrl ? "set" : "missing", "Key:", supabaseKey ? "set" : "missing");
     return NextResponse.json({ data: [], total: 0 });
   }
 
@@ -48,6 +51,7 @@ export async function GET(req: NextRequest) {
   const { data, count, error } = await query;
 
   if (error) {
+    console.error("Resources query error:", error.message, error.details);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 

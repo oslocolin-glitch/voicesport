@@ -17,6 +17,8 @@ function slugify(text: string): string {
     .slice(0, 100);
 }
 
+export const maxDuration = 30;
+
 export async function POST(req: NextRequest) {
   const supabase = getClient();
   if (!supabase) {
