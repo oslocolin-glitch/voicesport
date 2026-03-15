@@ -67,7 +67,7 @@ export async function GET(
   // Get practitioner brief file
   const { data: briefFile } = await supabase
     .from("resource_files")
-    .select("file_path")
+    .select("storage_path")
     .eq("resource_id", resourceId)
     .eq("file_type", "practitioner_brief")
     .order("created_at", { ascending: false })
@@ -76,11 +76,11 @@ export async function GET(
 
   let briefContent = "";
 
-  if (briefFile?.file_path) {
+  if (briefFile?.storage_path) {
     // Download brief content from storage
     const { data: fileData } = await supabase.storage
       .from("resources")
-      .download(briefFile.file_path);
+      .download(briefFile.storage_path);
 
     if (fileData) {
       briefContent = await fileData.text();

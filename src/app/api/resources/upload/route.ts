@@ -83,7 +83,7 @@ export async function POST(req: NextRequest) {
       .from("resources")
       .update({
         status: "uploaded",
-        file_path: storagePath,
+        storage_path: storagePath,
         file_type: file.type,
         file_size: file.size,
       })
@@ -99,10 +99,10 @@ export async function POST(req: NextRequest) {
       .insert({
         resource_id: resId,
         file_type: "source",
-        file_path: storagePath,
+        storage_path: storagePath,
         file_name: file.name,
         file_size: file.size,
-        mime_type: file.type,
+        is_original: true,
       })
       .select("id")
       .single();

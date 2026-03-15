@@ -59,7 +59,7 @@ export async function GET(req: NextRequest) {
       .from("resource_files")
       .select("resource_id, file_type")
       .in("resource_id", ids)
-      .neq("file_type", "source");
+      .not("file_type", "like", "source%");
 
     const outputMap: Record<number, string[]> = {};
     if (files) {
