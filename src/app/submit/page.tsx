@@ -135,12 +135,19 @@ export default function SubmitPage() {
         }),
       });
 
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || "Failed to create resource");
+      const text = await res.text();
+      let resData;
+      try {
+        resData = JSON.parse(text);
+      } catch {
+        throw new Error(`Server error: ${text.slice(0, 100)}`);
       }
 
-      const { resource_id } = await res.json();
+      if (!res.ok) {
+        throw new Error(resData.error || "Failed to create resource");
+      }
+
+      const resource_id = resData.resource_id;
 
       // 2. Upload files
       for (const file of files) {
