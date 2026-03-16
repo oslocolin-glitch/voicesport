@@ -149,22 +149,29 @@ export default function SubmitPage() {
 
       const resource_id = resData.resource_id;
 
-      // 2. Upload files
+      // 2. Upload files (non-blocking — resource is already created)
+      let uploadErrors = 0;
       for (const file of files) {
-        const formData = new FormData();
-        formData.append("file", file);
-        formData.append("resource_id", String(resource_id));
-        formData.append("selected_formats", JSON.stringify(Array.from(selectedTransforms)));
+        try {
+          const formData = new FormData();
+          formData.append("file", file);
+          formData.append("resource_id", String(resource_id));
+          formData.append("selected_formats", JSON.stringify(Array.from(selectedTransforms)));
 
-        const uploadRes = await fetch("/api/resources/upload", { method: "POST", body: formData });
-        if (!uploadRes.ok) {
-          const data = await uploadRes.json();
-          console.error("Upload error:", data.error);
+          const uploadRes = await fetch("/api/resources/upload", { method: "POST", body: formData });
+          if (!uploadRes.ok) {
+            const upText = await uploadRes.text();
+            console.error("Upload error:", upText);
+            uploadErrors++;
+          }
+        } catch (uploadErr) {
+          console.error("Upload exception:", uploadErr);
+          uploadErrors++;
         }
       }
 
-      // Success — redirect to resource page or dashboard
-      router.push(`/submit/success?id=${resource_id}`);
+      // Success — redirect even if some uploads failed
+      router.push(`/submit/success?id=${resource_id}${uploadErrors ? "&uploadErrors=" + uploadErrors : ""}`);
     } catch (err: unknown) {
       setSubmitError(err instanceof Error ? err.message : "Submission failed");
     } finally {
