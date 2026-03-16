@@ -127,7 +127,6 @@ export default function SubmitPage() {
       // 1. Create resource record
       const res = await fetch("/api/resources/submit", {
         method: "POST",
-        redirect: "follow",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...form,
